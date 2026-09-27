@@ -1,0 +1,26 @@
+{
+  "_comment": "RecKeeper 配置示例（结构与 config.json 相同）。时段示例：08:00-12:00、14:00-18:00 两段；跨天示例：22:00-06:00。cameras 支持 1~8 台，id 唯一。stream_type: 0 主码流 / 1 子码流 / 2 三码流。",
+  "sdk": {
+    "lib_path": "E:\\works\\2030\\海康威视SDK\\HCNetSDKV6.1.11.30_build20260805_Win64_ZH\\库文件",
+    "log_level": 3
+  },
+  "recording": {
+    "save_dir": "E:\\works\\2030\\RecKeeper\\recordings",
+    "periods": [
+      { "start": "08:00", "end": "12:00" },
+      { "start": "14:00", "end": "18:00" }
+    ]
+  },
+  "log_dir": "E:\\works\\2030\\RecKeeper\\logs",
+  "tick_seconds": 15,
+  "cameras": [
+    { "id": 1, "name": "cam01", "ip": "192.168.1.101", "port": 8000, "username": "admin", "password": "your_password", "channel": 1, "stream_type": 1, "enabled": true },
+    { "id": 2, "name": "cam02", "ip": "192.168.1.102", "port": 8000, "username": "admin", "password": "your_password", "channel": 1, "stream_type": 1, "enabled": true },
+    { "id": 3, "name": "cam03", "ip": "192.168.1.103", "port": 8000, "username": "admin", "password": "your_password", "channel": 1, "stream_type": 1, "enabled": true },
+    { "id": 4, "name": "cam04", "ip": "192.168.1.104", "port": 8000, "username": "admin", "password": "your_password", "channel": 1, "stream_type": 1, "enabled": true },
+    { "id": 5, "name": "cam05", "ip": "192.168.1.105", "port": 8000, "username": "admin", "password": "your_password", "channel": 1, "stream_type": 1, "enabled": true },
+    { "id": 6, "name": "cam06", "ip": "192.168.1.106", "port": 8000, "username": "admin", "password": "your_password", "channel": 1, "stream_type": 1, "enabled": true },
+    { "id": 7, "name": "cam07", "ip": "192.168.1.107", "port": 8000, "username": "admin", "password": "your_password", "channel": 1, "stream_type": 1, "enabled": true },
+    { "id": 8, "name": "cam08", "ip": "192.168.1.108", "port": 8000, "username": "admin", "password": "your_password", "channel": 1, "stream_type": 1, "enabled": true }
+  ]
+}
