@@ -749,17 +749,16 @@ class NET_DVR_VOD_PARA(Structure):
         ("struBeginTime", NET_DVR_TIME),
         ("struEndTime", NET_DVR_TIME),
         ("hWnd", c_uint32),
-        ("byDrawFrame", c_ubyte),  # 0:不抽帧，1：抽帧（修正：原 Demo 误用 c_uint64）
-        ("byVolumeType", c_ubyte),  # 0-普通录像卷  1-存档卷（修正：原 Demo 误用 c_uint32）
+        ("byDrawFrame", c_uint64),  # 0:不抽帧，1：抽帧
+        ("byVolumeType", c_uint32),  # 0-普通录像卷  1-存档卷
         ("byVolumeNum", c_ubyte),  # 卷号，目前指存档卷号
         ("byStreamType", c_ubyte),  # 码流类型 0-主码流， 1-子码流，2-码流三
-        ("dwFileIndex", c_uint32),  # 存档卷上的录像文件索引（修正：原 Demo 误用 c_ubyte）
+        ("dwFileIndex", c_ubyte),  # 存档卷上的录像文件索引，搜索存档卷录像时返回的值
         ("byAudioFile", c_ubyte),  # 音频文件0-否，1-是
         ("byCourseFile", c_ubyte),  # 课程文件0-否，1-是
         ("byDownload", c_ubyte),  # 是否下载 0-否，1-是
         ("byOptimalStreamType", c_ubyte),  # 是否按最优码流类型回放 0-否，1-是（对于双码流设备，某一段时间内的录像文件与指定码流类型不同，则返回实际码流类型的录像）
-        ("byUseAsyn", c_ubyte),  # 0-使用同步IO，1-使用异步IO（与头文件一致）
-        ("byRes2", c_ubyte * 19),  # 预留
+        ("byRes2", c_ubyte * 20),  # 预留
     ]
 
 
@@ -839,7 +838,7 @@ class NET_DVR_FILECOND_V50(Structure):
         ("szWorkingDeviceGUID", c_char * 16),  # 预留
         ("uSpecialFindInfo", NET_DVR_SPECIAL_FINDINFO_UNION),  # 预留
         ("dwTimeout", c_uint32),  # 预留
-        ("byRes", c_ubyte * 252),  # 预留（修正：原 Demo 误用 20，正确 252）
+        ("byRes", c_ubyte * 20),  # 预留
     ]
 
 
@@ -1108,52 +1107,3 @@ REALDATACALLBACK = fun_ctype(None, c_long, c_ulong, POINTER(c_ubyte), c_ulong, c
 PLAYBACKCALLBACK = fun_ctype(None, c_long, c_ulong, POINTER(c_ubyte), c_ulong, c_void_p)
 # 回放裸码流回调函数
 PLAYBACKESCALLBACK = fun_ctype(None, c_long, POINTER(c_ubyte), c_void_p)
-
-# ============================================================================
-# RecKeeper 追加：显式声明常用 SDK 函数的参数与返回类型（ctypes 64 位安全）
-# 参考《设备网络SDK使用手册》接口定义；未覆盖的函数仍可动态调用
-# ============================================================================
-
-# 报警/异常回调类型（SetupAlarmChan 与 SetExceptionCallBack 用）
-MSG_CALLBACK = fun_ctype(None, c_uint32, LPNET_DVR_ALARMER, c_void_p, c_ulong, c_void_p)
-EXCEPTION_CALLBACK = fun_ctype(None, c_uint32, c_uint32, c_void_p, c_void_p)
-
-
-def configure_sdk_dll(dll):
-    """为关键 SDK 接口设置 argtypes/restype，避免 64 位下指针截断与类型误判。"""
-    # 生命周期
-    dll.NET_DVR_Init.restype = c_int
-    dll.NET_DVR_Cleanup.restype = c_int
-    dll.NET_DVR_GetLastError.restype = c_int
-    dll.NET_DVR_GetLastError.argtypes = []
-    # 初始化配置
-    dll.NET_DVR_SetSDKInitCfg.restype = c_int
-    dll.NET_DVR_SetSDKInitCfg.argtypes = [c_uint32, c_void_p]
-    dll.NET_DVR_SetSDKLocalCfg.restype = c_int
-    dll.NET_DVR_SetSDKLocalCfg.argtypes = [c_uint32, c_void_p]
-    dll.NET_DVR_SetLogToFile.restype = c_int
-    dll.NET_DVR_SetLogToFile.argtypes = [c_uint32, c_char_p, c_int]
-    dll.NET_DVR_SetConnectTime.restype = c_int
-    dll.NET_DVR_SetConnectTime.argtypes = [c_uint32, c_uint32]
-    dll.NET_DVR_SetReconnect.restype = c_int
-    dll.NET_DVR_SetReconnect.argtypes = [c_uint32, c_int]
-    # 登录
-    dll.NET_DVR_Login_V40.restype = c_int
-    dll.NET_DVR_Login_V40.argtypes = [LPNET_DVR_USER_LOGIN_INFO, LPNET_DVR_DEVICEINFO_V40]
-    dll.NET_DVR_Logout.restype = c_int
-    dll.NET_DVR_Logout.argtypes = [c_int]
-    # 预览与客户端录像（main.py 功能 2 的核心链路）
-    dll.NET_DVR_RealPlay_V40.restype = c_int
-    dll.NET_DVR_RealPlay_V40.argtypes = [c_int, LPNET_DVR_PREVIEWINFO, REALDATACALLBACK, c_void_p]
-    dll.NET_DVR_StopRealPlay.restype = c_int
-    dll.NET_DVR_StopRealPlay.argtypes = [c_int]
-    dll.NET_DVR_SaveRealData.restype = c_int
-    dll.NET_DVR_SaveRealData.argtypes = [c_int, c_char_p]
-    dll.NET_DVR_StopSaveRealData.restype = c_int
-    dll.NET_DVR_StopSaveRealData.argtypes = [c_int]
-    # 异常回调
-    dll.NET_DVR_SetExceptionCallBack_V30.restype = c_int
-    dll.NET_DVR_SetExceptionCallBack_V30.argtypes = [c_uint32, c_void_p]
-    # 能力集
-    dll.NET_DVR_GetSDKAbility.restype = c_int
-    return dll
